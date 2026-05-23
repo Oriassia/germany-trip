@@ -4,6 +4,7 @@ import { RouteEditPanel } from './RouteEditPanel';
 export function RouteBar() {
   const {
     trip,
+    canEdit,
     editRouteOpen,
     setEditRouteOpen,
     saveRoutePoints,
@@ -20,22 +21,23 @@ export function RouteBar() {
       <div className="route-bar" id="route-bar">
         <div className="route-bar-inner">
           {cities.flatMap((city, i) => [
-            <span key={`c-${i}`}>
-              <div className="dot" />
+            <span key={`c-${i}`} className="route-stop">
               {city}
             </span>,
             ...(i < cities.length - 1
-              ? [<span key={`a-${i}`} className="arrow">→</span>]
+              ? [<span key={`a-${i}`} className="route-arrow" aria-hidden>←</span>]
               : []),
           ])}
         </div>
-        <button
-          type="button"
-          className={`section-edit-btn route-edit-btn${editRouteOpen ? ' open' : ''}`}
-          onClick={() => setEditRouteOpen(!editRouteOpen)}
-        >
-          ✏️
-        </button>
+        {canEdit && (
+          <button
+            type="button"
+            className={`section-edit-btn route-edit-btn${editRouteOpen ? ' open' : ''}`}
+            onClick={() => setEditRouteOpen(!editRouteOpen)}
+          >
+            ✏️
+          </button>
+        )}
       </div>
       <RouteEditPanel
         days={trip.days}

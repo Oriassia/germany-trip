@@ -6,8 +6,34 @@ interface EditToolbarProps {
 }
 
 export function EditToolbar({ onOpenSearch }: EditToolbarProps) {
-  const { toolbarMsg, exportData, importFromFile, resetAll } = useTripContext();
+  const {
+    toolbarMsg,
+    canEdit,
+    canManage,
+    exportData,
+    importFromFile,
+    clearAllDays,
+    setShareOpen,
+  } = useTripContext();
   const fileRef = useRef<HTMLInputElement>(null);
+
+  if (!canEdit && !canManage) {
+    return (
+      <div id="edit-bar" className="edit-toolbar edit-toolbar--readonly">
+        <span id="edit-label" className="edit-toolbar__label">
+          {toolbarMsg} · צפייה בלבד
+        </span>
+        <div className="edit-toolbar__divider" />
+        <button
+          type="button"
+          className="edit-toolbar__btn edit-toolbar__btn--search"
+          onClick={onOpenSearch}
+        >
+          🔍 חיפוש
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -29,10 +55,19 @@ export function EditToolbar({ onOpenSearch }: EditToolbarProps) {
         <button
           type="button"
           className="edit-toolbar__btn edit-toolbar__btn--danger"
-          onClick={resetAll}
+          onClick={clearAllDays}
         >
-          ↩ אפס
+          🗑️ מחק ימים
         </button>
+        {canManage && (
+          <button
+            type="button"
+            className="edit-toolbar__btn"
+            onClick={() => setShareOpen(true)}
+          >
+            👥 שיתוף
+          </button>
+        )}
         <div className="edit-toolbar__divider" />
         <button
           type="button"

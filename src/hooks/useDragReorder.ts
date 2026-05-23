@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 interface DragReorderOptions {
+  enabled?: boolean;
   onReorderActivities: (
     dayId: string,
     fromId: string,
@@ -11,10 +12,12 @@ interface DragReorderOptions {
 }
 
 export function useDragReorder({
+  enabled = true,
   onReorderActivities,
   onReorderDays,
 }: DragReorderOptions) {
   useEffect(() => {
+    if (!enabled) return;
     let dndSrc: HTMLElement | null = null;
     let dndType: 'act' | 'day' | null = null;
     let pendingSrc: HTMLElement | null = null;
@@ -177,5 +180,5 @@ export function useDragReorder({
       document.removeEventListener('drop', onDrop);
       document.removeEventListener('dragend', onDragend);
     };
-  }, [onReorderActivities, onReorderDays]);
+  }, [enabled, onReorderActivities, onReorderDays]);
 }

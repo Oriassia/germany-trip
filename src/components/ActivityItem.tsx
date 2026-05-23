@@ -9,6 +9,7 @@ interface ActivityItemProps {
 
 export function ActivityItem({ dayId, activity }: ActivityItemProps) {
   const {
+    canEdit,
     editActKey,
     setEditActKey,
     saveActivity,
@@ -25,9 +26,11 @@ export function ActivityItem({ dayId, activity }: ActivityItemProps) {
       data-actid={activity.id}
     >
       <div className="timeline-item">
-        <span className="tl-handle" title="גרור לסידור מחדש">
-          ⠿
-        </span>
+        {canEdit && (
+          <span className="tl-handle" title="גרור לסידור מחדש">
+            ⠿
+          </span>
+        )}
         <div className="tl-left">
           <div className="tl-icon">{activity.icon}</div>
           <div className="tl-line" />
@@ -47,13 +50,15 @@ export function ActivityItem({ dayId, activity }: ActivityItemProps) {
             </a>
           )}
         </div>
-        <button
-          type="button"
-          className={`act-edit-btn${open ? ' open' : ''}`}
-          onClick={() => setEditActKey(open ? null : actKey)}
-        >
-          ✏️
-        </button>
+        {canEdit && (
+          <button
+            type="button"
+            className={`act-edit-btn${open ? ' open' : ''}`}
+            onClick={() => setEditActKey(open ? null : actKey)}
+          >
+            ✏️
+          </button>
+        )}
       </div>
 
       <ActivityEditPanel

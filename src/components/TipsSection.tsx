@@ -2,19 +2,21 @@ import { useTripContext } from '../context/TripContext';
 import { TipsEditPanel } from './TipsEditPanel';
 
 export function TipsSection() {
-  const { trip, editTipsOpen, setEditTipsOpen, saveTips } = useTripContext();
+  const { trip, canEdit, editTipsOpen, setEditTipsOpen, saveTips } = useTripContext();
 
   return (
     <div className="tip-card">
       <div className="tip-card-header">
         <h3>{trip.meta.tipsSectionTitle}</h3>
-        <button
-          type="button"
-          className={`section-edit-btn tips-edit-btn${editTipsOpen ? ' open' : ''}`}
-          onClick={() => setEditTipsOpen(!editTipsOpen)}
-        >
-          ✏️ ערוך
-        </button>
+        {canEdit && (
+          <button
+            type="button"
+            className={`section-edit-btn tips-edit-btn${editTipsOpen ? ' open' : ''}`}
+            onClick={() => setEditTipsOpen(!editTipsOpen)}
+          >
+            ✏️ ערוך
+          </button>
+        )}
       </div>
       {trip.tips.map((tip) => (
         <div className="tip-row" key={tip.id}>

@@ -11,6 +11,7 @@ interface DayCardProps {
 
 export function DayCard({ day, dayNum }: DayCardProps) {
   const {
+    canEdit,
     editDayId,
     setEditDayId,
     saveDay,
@@ -34,13 +35,15 @@ export function DayCard({ day, dayNum }: DayCardProps) {
       data-dayid={day.id}
     >
       <div className="day-header" onClick={toggleCollapse}>
-        <span
-          className="day-drag-handle"
-          title="גרור לשינוי סדר ימים"
-          onClick={(e) => e.stopPropagation()}
-        >
-          ⠿
-        </span>
+        {canEdit && (
+          <span
+            className="day-drag-handle"
+            title="גרור לשינוי סדר ימים"
+            onClick={(e) => e.stopPropagation()}
+          >
+            ⠿
+          </span>
+        )}
         <div
           className="day-num"
           data-day-color={dayColorIndex}
@@ -54,16 +57,18 @@ export function DayCard({ day, dayNum }: DayCardProps) {
             {day.hotel || '—'}
           </div>
         </div>
-        <button
-          type="button"
-          className={`day-edit-btn${dayEditOpen ? ' open' : ''}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            setEditDayId(dayEditOpen ? null : day.id);
-          }}
-        >
-          ✏️ ערוך
-        </button>
+        {canEdit && (
+          <button
+            type="button"
+            className={`day-edit-btn${dayEditOpen ? ' open' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditDayId(dayEditOpen ? null : day.id);
+            }}
+          >
+            ✏️ ערוך
+          </button>
+        )}
         <span className="day-chevron">▼</span>
       </div>
 
@@ -93,13 +98,15 @@ export function DayCard({ day, dayNum }: DayCardProps) {
             🗺️ נווט יום זה
           </a>
         )}
-        <button
-          type="button"
-          className="add-act-btn"
-          onClick={() => addActivity(day.id)}
-        >
-          + הוסף פעילות
-        </button>
+        {canEdit && (
+          <button
+            type="button"
+            className="add-act-btn"
+            onClick={() => addActivity(day.id)}
+          >
+            + הוסף פעילות
+          </button>
+        )}
       </div>
     </div>
   );

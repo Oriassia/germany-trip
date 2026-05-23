@@ -62,17 +62,19 @@ export function RouteEditPanel({
         <label>נקודת סיום (שדה תעופה וכו׳)</label>
         <input value={endLabel} onChange={(e) => setEndLabel(e.target.value)} />
       </div>
-      <div className="edit-panel-actions">
-        <button
-          type="button"
-          className="btn-save"
-          onClick={() => onSave(points, endLabel)}
-        >
-          ✓ שמור
-        </button>
-        <button type="button" className="btn-cancel" onClick={onCancel}>
-          ✕ בטל
-        </button>
+      <div className="edit-panel-actions route-edit-actions">
+        <div className="edit-panel-actions-group">
+          <button
+            type="button"
+            className="btn-save"
+            onClick={() => onSave(points, endLabel)}
+          >
+            ✓ שמור
+          </button>
+          <button type="button" className="btn-cancel" onClick={onCancel}>
+            ✕ בטל
+          </button>
+        </div>
         <button type="button" className="btn-sync" onClick={onSync}>
           ↻ סנכרן ממסלולי הימים
         </button>

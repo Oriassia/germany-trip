@@ -2,4 +2,7 @@ node_modules
 dist
 dist-ssr
 *.local
+.env.local
+.firebaserc
 .DS_Store
+functions/lib

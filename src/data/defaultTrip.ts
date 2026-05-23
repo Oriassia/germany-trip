@@ -1,9 +1,5 @@
 import type { Trip } from '../types/trip';
-import {
-  DEFAULT_META,
-  DEFAULT_TIPS,
-  routePointFromRoute,
-} from '../utils/normalizeTrip';
+import { routePointFromRoute } from '../utils/normalizeTrip';
 
 const days = [
   {
@@ -214,9 +210,19 @@ const days = [
   },
 ] as const;
 
+/** Reference only — not loaded at runtime. */
 export const DEFAULT_TRIP: Trip = {
-  meta: DEFAULT_META,
-  tips: structuredClone(DEFAULT_TIPS),
+  title: 'טיול גרמניה 2026',
+  meta: {
+    heroTitle: '✈️ 🇩🇪 טיול גרמניה – יוני 2026',
+    heroSubtitle: 'פרנקפורט ← דרך הרומנטית ← רגנסבורג ← מינכן',
+    routeEndLabel: 'MUC ✈️',
+    tipsSectionTitle: '⚙️ טיפים טכניים לנסיעה',
+  },
+  tips: [
+    { id: 't1', icon: '🛣️', text: 'אוטובאן: שימו לב לשלטים.' },
+    { id: 't2', icon: '🅿️', text: 'חניה: רוטנבורג – Parkhaus Kobolzeller Steige.' },
+  ],
   days: days.map((d) => ({
     ...d,
     routePoint: routePointFromRoute(d.route),

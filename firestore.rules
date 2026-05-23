@@ -1,0 +1,88 @@
+rules_version = '2';
+
+// Small-project rules: authenticated members + owners manage sharing.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isMember(tripId) {
+      return exists(
+        /databases/$(database)/documents/trips/$(tripId)/members/$(request.auth.uid)
+      );
+    }
+
+    function memberRole(tripId) {
+      return get(
+        /databases/$(database)/documents/trips/$(tripId)/members/$(request.auth.uid)
+      ).data.role;
+    }
+
+    function isEditor(tripId) {
+      return memberRole(tripId) in ['owner', 'editor'];
+    }
+
+    function isOwner(tripId) {
+      return memberRole(tripId) == 'owner';
+    }
+
+    function isTripCreator(tripId) {
+      return get(/databases/$(database)/documents/trips/$(tripId)).data.createdBy
+        == request.auth.uid;
+    }
+
+    function canManageInvites(tripId) {
+      return isOwner(tripId) || isTripCreator(tripId);
+    }
+
+    // Inbox for pending invites (path uses lower-case email as doc id)
+    match /userInvites/{email} {
+      allow read: if request.auth != null
+        && request.auth.token.email != null
+        && email == request.auth.token.email;
+
+      match /trips/{tripId} {
+        allow read, update: if request.auth != null
+          && request.auth.token.email != null
+          && email == request.auth.token.email;
+        allow create, delete: if request.auth != null && canManageInvites(tripId);
+      }
+    }
+
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+
+      match /memberships/{tripId} {
+        allow read: if request.auth != null && request.auth.uid == uid;
+        allow create, update: if request.auth != null
+          && (request.auth.uid == uid || canManageInvites(tripId));
+        allow delete: if request.auth != null
+          && (request.auth.uid == uid || canManageInvites(tripId));
+      }
+    }
+
+    match /trips/{tripId} {
+      allow read: if request.auth != null && isMember(tripId);
+      allow create: if request.auth != null
+        && request.resource.data.createdBy == request.auth.uid;
+      allow update: if request.auth != null && isEditor(tripId);
+      allow delete: if request.auth != null && canManageInvites(tripId);
+
+      match /members/{memberId} {
+        allow read: if request.auth != null && isMember(tripId);
+        allow create: if request.auth != null
+          && (canManageInvites(tripId) || request.auth.uid == memberId);
+        allow update: if request.auth != null && canManageInvites(tripId);
+        allow delete: if request.auth != null
+          && (canManageInvites(tripId) || request.auth.uid == memberId);
+      }
+
+      match /invites/{inviteId} {
+        allow read: if request.auth != null && isMember(tripId);
+        allow create: if request.auth != null && canManageInvites(tripId);
+        allow update: if request.auth != null
+          && (canManageInvites(tripId)
+            || (request.auth.token.email != null
+              && resource.data.email == request.auth.token.email));
+        allow delete: if request.auth != null && canManageInvites(tripId);
+      }
+    }
+  }
+}
