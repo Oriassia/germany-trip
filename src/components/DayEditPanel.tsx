@@ -20,6 +20,7 @@ export function DayEditPanel({
     dayName: day.dayName,
     date: day.date,
     route: day.route,
+    routePoint: day.routePoint,
     km: day.km,
     hotel: day.hotel,
     hotelUrl: day.hotelUrl,
@@ -32,6 +33,7 @@ export function DayEditPanel({
         dayName: day.dayName,
         date: day.date,
         route: day.route,
+        routePoint: day.routePoint,
         km: day.km,
         hotel: day.hotel,
         hotelUrl: day.hotelUrl,
@@ -62,6 +64,14 @@ export function DayEditPanel({
         <label>מסלול (כותרת)</label>
         <input value={form.route} onChange={(e) => set('route', e.target.value)} />
       </div>
+      <div className="fld">
+        <label>שם קצר לפס המסלול למעלה</label>
+        <input
+          value={form.routePoint}
+          onChange={(e) => set('routePoint', e.target.value)}
+          placeholder="למשל: פרנקפורט"
+        />
+      </div>
       <div className="form-row2">
         <div className="fld">
           <label>מרחק</label>
@@ -77,6 +87,7 @@ export function DayEditPanel({
       </div>
       <div className="fld">
         <label>Maps ללינה</label>
+        <span className="fld-hint">מופיע בקישורים מהירים למטה</span>
         <input
           value={form.hotelUrl}
           onChange={(e) => set('hotelUrl', e.target.value)}
@@ -86,6 +97,7 @@ export function DayEditPanel({
       </div>
       <div className="fld">
         <label>קישור ניווט יומי</label>
+        <span className="fld-hint">מופיע בקישורים מהירים למטה</span>
         <input
           value={form.navUrl}
           onChange={(e) => set('navUrl', e.target.value)}

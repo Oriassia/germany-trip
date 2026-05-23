@@ -12,6 +12,7 @@ export interface Day {
   dayName: string;
   date: string;
   route: string;
+  routePoint: string;
   km: string;
   hotel: string;
   hotelUrl: string;
@@ -19,6 +20,21 @@ export interface Day {
   activities: Activity[];
 }
 
+export interface TripMeta {
+  heroTitle: string;
+  heroSubtitle: string;
+  routeEndLabel: string;
+  tipsSectionTitle: string;
+}
+
+export interface Tip {
+  id: string;
+  icon: string;
+  text: string;
+}
+
 export interface Trip {
+  meta: TripMeta;
+  tips: Tip[];
   days: Day[];
 }

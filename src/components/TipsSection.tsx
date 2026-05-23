@@ -1,40 +1,34 @@
-const TIPS = [
-  {
-    icon: '🛣️',
-    text: 'אוטובאן: שימו לב לשלטים. קטעים רבים מוגבלים ל-120–130 קמ"ש. מצלמות אוטומטיות נפוצות.',
-  },
-  {
-    icon: '🅿️',
-    text: 'חניה: רוטנבורג – Parkhaus Kobolzeller Steige. רגנסבורג – Parkhaus Dachauplatz. מינכן – חנייה מרכזית ברשמה מראש.',
-  },
-  {
-    icon: '⛽',
-    text: 'דלק: תחנות על האוטובאן יקרות ב-15–20%. עדיף לתדלק בתוך הערים.',
-  },
-  {
-    icon: '🌡️',
-    text: 'מזג אוויר יוני: 22–25°C ביום. ייתכנו גשמים קצרים. שכבה לערב בגינות הבירה.',
-  },
-  {
-    icon: '💶',
-    text: 'מטבע: אירו. קחו קצת מזומן לשווקים ומסעדות קטנות.',
-  },
-  {
-    icon: '📱',
-    text: 'ניווט: הורידו Google Maps offline לפני היציאה. כיסוי מצוין על A8 ו-A9.',
-  },
-];
+import { useTripContext } from '../context/TripContext';
+import { TipsEditPanel } from './TipsEditPanel';
 
 export function TipsSection() {
+  const { trip, editTipsOpen, setEditTipsOpen, saveTips } = useTripContext();
+
   return (
     <div className="tip-card">
-      <h3>⚙️ טיפים טכניים לנסיעה</h3>
-      {TIPS.map((tip, i) => (
-        <div className="tip-row" key={i}>
+      <div className="tip-card-header">
+        <h3>{trip.meta.tipsSectionTitle}</h3>
+        <button
+          type="button"
+          className={`section-edit-btn tips-edit-btn${editTipsOpen ? ' open' : ''}`}
+          onClick={() => setEditTipsOpen(!editTipsOpen)}
+        >
+          ✏️ ערוך
+        </button>
+      </div>
+      {trip.tips.map((tip) => (
+        <div className="tip-row" key={tip.id}>
           <div className="tip-icon">{tip.icon}</div>
           <div className="tip-text">{tip.text}</div>
         </div>
       ))}
+      <TipsEditPanel
+        tips={trip.tips}
+        tipsSectionTitle={trip.meta.tipsSectionTitle}
+        open={editTipsOpen}
+        onSave={(tips, tipsSectionTitle) => saveTips(tips, tipsSectionTitle)}
+        onCancel={() => setEditTipsOpen(false)}
+      />
     </div>
   );
 }

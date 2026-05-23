@@ -9,12 +9,13 @@ import {
 } from 'react';
 import { DEFAULT_TOOLBAR_LABEL, STORAGE_KEY } from '../constants';
 import { DEFAULT_TRIP } from '../data/defaultTrip';
-import type { Activity, Day, Trip } from '../types/trip';
+import type { Activity, Day, Tip, Trip, TripMeta } from '../types/trip';
+import { normalizeTrip, routePointFromRoute } from '../utils/normalizeTrip';
 
 function loadTrip(): Trip {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as Trip;
+    if (raw) return normalizeTrip(JSON.parse(raw));
   } catch {
     /* ignore */
   }
@@ -47,12 +48,25 @@ export interface TripContextValue {
   toolbarMsg: string;
   editDayId: string | null;
   editActKey: string | null;
+  editHeroOpen: boolean;
+  editRouteOpen: boolean;
+  editTipsOpen: boolean;
   setEditDayId: (id: string | null) => void;
   setEditActKey: (key: string | null) => void;
+  setEditHeroOpen: (open: boolean) => void;
+  setEditRouteOpen: (open: boolean) => void;
+  setEditTipsOpen: (open: boolean) => void;
   showMsg: (msg: string) => void;
   exportData: () => void;
   importFromFile: (file: File) => void;
   resetAll: () => void;
+  saveMeta: (updates: Partial<TripMeta>) => void;
+  saveTips: (tips: Tip[], tipsSectionTitle?: string) => void;
+  syncRoutePointsFromDays: () => void;
+  saveRoutePoints: (
+    routePoints: { dayId: string; routePoint: string }[],
+    routeEndLabel: string,
+  ) => void;
   addDay: () => string;
   removeDay: (dayId: string) => void;
   saveDay: (dayId: string, updates: Partial<Day>) => void;
@@ -75,11 +89,57 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [toolbarMsg, setToolbarMsg] = useState(DEFAULT_TOOLBAR_LABEL);
   const [editDayId, setEditDayId] = useState<string | null>(null);
   const [editActKey, setEditActKey] = useState<string | null>(null);
+  const [editHeroOpen, setEditHeroOpenState] = useState(false);
+  const [editRouteOpen, setEditRouteOpenState] = useState(false);
+  const [editTipsOpen, setEditTipsOpenState] = useState(false);
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const closePageEdits = useCallback(() => {
+    setEditHeroOpenState(false);
+    setEditRouteOpenState(false);
+    setEditTipsOpenState(false);
+  }, []);
+
+  const setEditHeroOpen = useCallback(
+    (open: boolean) => {
+      if (open) {
+        closePageEdits();
+        setEditHeroOpenState(true);
+      } else {
+        setEditHeroOpenState(false);
+      }
+    },
+    [closePageEdits],
+  );
+
+  const setEditRouteOpen = useCallback(
+    (open: boolean) => {
+      if (open) {
+        closePageEdits();
+        setEditRouteOpenState(true);
+      } else {
+        setEditRouteOpenState(false);
+      }
+    },
+    [closePageEdits],
+  );
+
+  const setEditTipsOpen = useCallback(
+    (open: boolean) => {
+      if (open) {
+        closePageEdits();
+        setEditTipsOpenState(true);
+      } else {
+        setEditTipsOpenState(false);
+      }
+    },
+    [closePageEdits],
+  );
+
   const commit = useCallback((next: Trip) => {
-    setTrip(next);
-    persistTrip(next);
+    const normalized = normalizeTrip(next);
+    setTrip(normalized);
+    persistTrip(normalized);
   }, []);
 
   const showMsg = useCallback((msg: string) => {
@@ -106,8 +166,11 @@ export function TripProvider({ children }: { children: ReactNode }) {
       const reader = new FileReader();
       reader.onload = (ev) => {
         try {
-          const parsed = JSON.parse(ev.target?.result as string) as Trip;
+          const parsed = normalizeTrip(JSON.parse(ev.target?.result as string));
           commit(parsed);
+          closePageEdits();
+          setEditDayId(null);
+          setEditActKey(null);
           showMsg('✓ יובא בהצלחה');
         } catch {
           alert('קובץ לא תקין');
@@ -115,7 +178,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       };
       reader.readAsText(file);
     },
-    [commit, showMsg],
+    [commit, showMsg, closePageEdits],
   );
 
   const resetAll = useCallback(() => {
@@ -125,19 +188,86 @@ export function TripProvider({ children }: { children: ReactNode }) {
     commit(next);
     setEditDayId(null);
     setEditActKey(null);
+    closePageEdits();
     showMsg('↩ אופס');
-  }, [commit, showMsg]);
+  }, [commit, showMsg, closePageEdits]);
+
+  const saveMeta = useCallback(
+    (updates: Partial<TripMeta>) => {
+      commit({
+        ...trip,
+        meta: { ...trip.meta, ...updates },
+      });
+      setEditHeroOpenState(false);
+      showMsg('✓ נשמר');
+    },
+    [trip, commit, showMsg],
+  );
+
+  const saveTips = useCallback(
+    (tips: Tip[], tipsSectionTitle?: string) => {
+      commit({
+        ...trip,
+        tips,
+        meta: {
+          ...trip.meta,
+          ...(tipsSectionTitle !== undefined
+            ? { tipsSectionTitle }
+            : {}),
+        },
+      });
+      setEditTipsOpenState(false);
+      showMsg('✓ נשמר');
+    },
+    [trip, commit, showMsg],
+  );
+
+  const syncRoutePointsFromDays = useCallback(() => {
+      commit({
+        ...trip,
+        days: trip.days.map((d) => ({
+          ...d,
+          routePoint: routePointFromRoute(d.route),
+        })),
+      });
+      showMsg('✓ סונכרן');
+    },
+    [trip, commit, showMsg],
+  );
+
+  const saveRoutePoints = useCallback(
+    (
+      routePoints: { dayId: string; routePoint: string }[],
+      routeEndLabel: string,
+    ) => {
+      const pointMap = new Map(routePoints.map((p) => [p.dayId, p.routePoint]));
+      commit({
+        ...trip,
+        meta: { ...trip.meta, routeEndLabel },
+        days: trip.days.map((d) => ({
+          ...d,
+          routePoint: pointMap.get(d.id) ?? d.routePoint,
+        })),
+      });
+      setEditRouteOpenState(false);
+      showMsg('✓ נשמר');
+    },
+    [trip, commit, showMsg],
+  );
 
   const addDay = useCallback(() => {
     const id = 'd' + Date.now();
+    const route = 'מסלול יום חדש';
     const next: Trip = {
+      ...trip,
       days: [
         ...trip.days,
         {
           id,
           dayName: 'יום ' + (trip.days.length + 1),
           date: '',
-          route: 'מסלול יום חדש',
+          route,
+          routePoint: routePointFromRoute(route),
           km: '~0',
           hotel: '',
           hotelUrl: '',
@@ -158,20 +288,21 @@ export function TripProvider({ children }: { children: ReactNode }) {
     commit(next);
     setEditDayId(id);
     return id;
-  }, [trip.days, commit]);
+  }, [trip, commit]);
 
   const removeDay = useCallback(
     (dayId: string) => {
       if (!confirm('למחוק את היום הזה?')) return;
-      commit({ days: trip.days.filter((d) => d.id !== dayId) });
+      commit({ ...trip, days: trip.days.filter((d) => d.id !== dayId) });
       if (editDayId === dayId) setEditDayId(null);
     },
-    [trip.days, commit, editDayId],
+    [trip, commit, editDayId],
   );
 
   const saveDay = useCallback(
     (dayId: string, updates: Partial<Day>) => {
       commit({
+        ...trip,
         days: trip.days.map((d) =>
           d.id === dayId ? { ...d, ...updates } : d,
         ),
@@ -179,13 +310,14 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setEditDayId(null);
       showMsg('✓ נשמר');
     },
-    [trip.days, commit, showMsg],
+    [trip, commit, showMsg],
   );
 
   const addActivity = useCallback(
     (dayId: string) => {
       const actId = 'a' + Date.now();
       const next: Trip = {
+        ...trip,
         days: trip.days.map((d) =>
           d.id === dayId
             ? {
@@ -209,12 +341,13 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setEditActKey(`${dayId}:${actId}`);
       return actId;
     },
-    [trip.days, commit],
+    [trip, commit],
   );
 
   const saveActivity = useCallback(
     (dayId: string, actId: string, updates: Partial<Activity>) => {
       commit({
+        ...trip,
         days: trip.days.map((d) =>
           d.id === dayId
             ? {
@@ -229,13 +362,14 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setEditActKey(null);
       showMsg('✓ נשמר');
     },
-    [trip.days, commit, showMsg],
+    [trip, commit, showMsg],
   );
 
   const deleteActivity = useCallback(
     (dayId: string, actId: string) => {
       if (!confirm('למחוק פעילות זו?')) return;
       commit({
+        ...trip,
         days: trip.days.map((d) =>
           d.id === dayId
             ? {
@@ -247,12 +381,13 @@ export function TripProvider({ children }: { children: ReactNode }) {
       });
       if (editActKey === `${dayId}:${actId}`) setEditActKey(null);
     },
-    [trip.days, commit, editActKey],
+    [trip, commit, editActKey],
   );
 
   const reorderActivities = useCallback(
     (dayId: string, fromId: string, toId: string, before: boolean) => {
-      const next: Trip = {
+      commit({
+        ...trip,
         days: trip.days.map((d) =>
           d.id === dayId
             ? {
@@ -261,17 +396,16 @@ export function TripProvider({ children }: { children: ReactNode }) {
               }
             : d,
         ),
-      };
-      commit(next);
+      });
     },
-    [trip.days, commit],
+    [trip, commit],
   );
 
   const reorderDays = useCallback(
     (fromId: string, toId: string, before: boolean) => {
-      commit({ days: reorderList(trip.days, fromId, toId, before) });
+      commit({ ...trip, days: reorderList(trip.days, fromId, toId, before) });
     },
-    [trip.days, commit],
+    [trip, commit],
   );
 
   const value = useMemo(
@@ -280,12 +414,22 @@ export function TripProvider({ children }: { children: ReactNode }) {
       toolbarMsg,
       editDayId,
       editActKey,
+      editHeroOpen,
+      editRouteOpen,
+      editTipsOpen,
       setEditDayId,
       setEditActKey,
+      setEditHeroOpen,
+      setEditRouteOpen,
+      setEditTipsOpen,
       showMsg,
       exportData,
       importFromFile,
       resetAll,
+      saveMeta,
+      saveTips,
+      syncRoutePointsFromDays,
+      saveRoutePoints,
       addDay,
       removeDay,
       saveDay,
@@ -300,10 +444,20 @@ export function TripProvider({ children }: { children: ReactNode }) {
       toolbarMsg,
       editDayId,
       editActKey,
+      editHeroOpen,
+      editRouteOpen,
+      editTipsOpen,
+      setEditHeroOpen,
+      setEditRouteOpen,
+      setEditTipsOpen,
       showMsg,
       exportData,
       importFromFile,
       resetAll,
+      saveMeta,
+      saveTips,
+      syncRoutePointsFromDays,
+      saveRoutePoints,
       addDay,
       removeDay,
       saveDay,
