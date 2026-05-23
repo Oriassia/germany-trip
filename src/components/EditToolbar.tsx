@@ -1,4 +1,4 @@
-import { useRef, type CSSProperties } from 'react';
+import { useRef } from 'react';
 import { useTripContext } from '../context/TripContext';
 
 interface EditToolbarProps {
@@ -11,76 +11,33 @@ export function EditToolbar({ onOpenSearch }: EditToolbarProps) {
 
   return (
     <>
-      <div
-        id="edit-bar"
-        style={{
-          position: 'fixed',
-          bottom: '1.5rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          background: '#26215C',
-          color: '#EEEDFE',
-          padding: '10px 20px',
-          borderRadius: 50,
-          fontSize: '0.85rem',
-          fontFamily:
-            "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-          boxShadow: '0 6px 28px rgba(38,33,92,0.4)',
-          zIndex: 9999,
-        }}
-      >
-        <span
-          id="edit-label"
-          style={{ fontSize: '0.82rem', color: '#AFA9EC' }}
-        >
+      <div id="edit-bar" className="edit-toolbar">
+        <span id="edit-label" className="edit-toolbar__label">
           {toolbarMsg}
         </span>
-        <div
-          style={{
-            width: 1,
-            height: 18,
-            background: 'rgba(255,255,255,0.2)',
-          }}
-        />
-        <button
-          type="button"
-          onClick={exportData}
-          style={toolbarBtnStyle}
-        >
+        <div className="edit-toolbar__divider" />
+        <button type="button" className="edit-toolbar__btn" onClick={exportData}>
           📤 ייצוא
         </button>
         <button
           type="button"
+          className="edit-toolbar__btn"
           onClick={() => fileRef.current?.click()}
-          style={toolbarBtnStyle}
         >
           📥 ייבוא
         </button>
         <button
           type="button"
+          className="edit-toolbar__btn edit-toolbar__btn--danger"
           onClick={resetAll}
-          style={{
-            ...toolbarBtnStyle,
-            background: 'rgba(255,80,80,0.25)',
-            color: '#ffaaaa',
-          }}
         >
           ↩ אפס
         </button>
-        <div
-          style={{
-            width: 1,
-            height: 18,
-            background: 'rgba(255,255,255,0.2)',
-          }}
-        />
+        <div className="edit-toolbar__divider" />
         <button
           type="button"
+          className="edit-toolbar__btn edit-toolbar__btn--search"
           onClick={onOpenSearch}
-          style={{ ...toolbarBtnStyle, background: 'rgba(255,255,255,0.15)' }}
         >
           🔍 חיפוש
         </button>
@@ -99,13 +56,3 @@ export function EditToolbar({ onOpenSearch }: EditToolbarProps) {
     </>
   );
 }
-
-const toolbarBtnStyle: CSSProperties = {
-  background: 'rgba(255,255,255,0.12)',
-  border: 'none',
-  color: '#EEEDFE',
-  padding: '5px 13px',
-  borderRadius: 20,
-  cursor: 'pointer',
-  fontSize: '0.8rem',
-};

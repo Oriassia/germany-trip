@@ -7,11 +7,9 @@ export function QuickLinks() {
 
   return (
     <div className="tip-card" id="quick-links">
-      <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: 14, color: '#26215C' }}>
-        🔗 קישורים מהירים
-      </h3>
+      <h3 className="section-title">🔗 קישורים מהירים</h3>
       <div className="section-label">מקומות לינה</div>
-      <div className="map-link-row" style={{ marginBottom: 12 }}>
+      <div className="map-link-row map-link-row--spaced">
         {hotels.length > 0 ? (
           hotels.map((d) => (
             <a

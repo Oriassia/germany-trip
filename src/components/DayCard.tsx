@@ -1,5 +1,4 @@
 import { useState, type MouseEvent } from 'react';
-import { DAY_COLORS } from '../constants';
 import { useTripContext } from '../context/TripContext';
 import type { Day } from '../types/trip';
 import { ActivityItem } from './ActivityItem';
@@ -20,7 +19,7 @@ export function DayCard({ day, dayNum }: DayCardProps) {
   } = useTripContext();
   const [collapsed, setCollapsed] = useState(false);
   const dayEditOpen = editDayId === day.id;
-  const color = DAY_COLORS[(dayNum - 1) % DAY_COLORS.length];
+  const dayColorIndex = (dayNum - 1) % 4;
 
   const toggleCollapse = (e: MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -44,7 +43,7 @@ export function DayCard({ day, dayNum }: DayCardProps) {
         </span>
         <div
           className="day-num"
-          style={{ background: color.bg, color: color.tx }}
+          data-day-color={dayColorIndex}
         >
           {dayNum}
         </div>

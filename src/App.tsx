@@ -45,16 +45,7 @@ function AppContent() {
         </button>
         <TipsSection />
         <QuickLinks />
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '1.5rem 0',
-            color: '#888780',
-            fontSize: '0.9rem',
-          }}
-        >
-          נסיעה טובה ומהנה! 🇩🇪✨
-        </div>
+        <div className="footer-note">נסיעה טובה ומהנה! 🇩🇪✨</div>
       </div>
 
       <SearchPanel open={searchOpen} onClose={() => setSearchOpen(false)} />

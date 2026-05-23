@@ -93,16 +93,8 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
       id="search-panel"
       className={open ? 'open' : ''}
     >
-      <div
-        style={{
-          padding: '14px 16px 10px',
-          borderBottom: '1px solid #f0ede6',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-        }}
-      >
-        <span style={{ fontSize: '1.1rem' }}>🔍</span>
+      <div className="search-header">
+        <span className="search-header__icon">🔍</span>
         <input
           ref={inputRef}
           id="search-input"
@@ -111,44 +103,19 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
           value={query}
           onChange={(e) => onInput(e.target.value)}
         />
-        <button
-          type="button"
-          onClick={onClose}
-          style={{
-            border: 'none',
-            background: 'none',
-            cursor: 'pointer',
-            color: '#888780',
-            fontSize: '1.1rem',
-            padding: '0 4px',
-          }}
-        >
+        <button type="button" className="search-close" onClick={onClose}>
           ✕
         </button>
       </div>
       <div
         id="search-status"
-        style={{
-          fontSize: '0.8rem',
-          color: '#888780',
-          padding: '8px 16px',
-          display: loading ? 'block' : 'none',
-        }}
+        style={{ display: loading ? 'block' : 'none' }}
       >
         מחפש...
       </div>
-      <div id="search-results" style={{ maxHeight: 300, overflowY: 'auto' }}>
+      <div id="search-results">
         {!loading && query.trim().length >= 2 && results.length === 0 && (
-          <div
-            style={{
-              padding: 16,
-              textAlign: 'center',
-              color: '#888780',
-              fontSize: '0.85rem',
-            }}
-          >
-            לא נמצאו תוצאות
-          </div>
+          <div className="search-empty">לא נמצאו תוצאות</div>
         )}
         {results.map((item, i) => {
           const name = item.display_name.split(',')[0];
@@ -159,68 +126,21 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
               key={i}
               role="button"
               tabIndex={0}
+              className="search-result"
               onClick={() => openMaps(item)}
               onKeyDown={(e) => e.key === 'Enter' && openMaps(item)}
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 10,
-                padding: '10px 16px',
-                borderBottom: '1px solid #f5f3ee',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = '#f9f8f5';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = '';
-              }}
             >
-              <div style={{ fontSize: '1.2rem', flexShrink: 0, marginTop: 1 }}>
-                {ico}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  style={{
-                    fontSize: '0.88rem',
-                    fontWeight: 600,
-                    color: '#1a1a18',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {name}
-                </div>
-                <div
-                  style={{
-                    fontSize: '0.75rem',
-                    color: '#888780',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {item.display_name}
-                </div>
+              <div className="search-result__icon">{ico}</div>
+              <div className="search-result__body">
+                <div className="search-result__name">{name}</div>
+                <div className="search-result__addr">{item.display_name}</div>
               </div>
               <a
                 href={mapsUrl}
                 target="_blank"
                 rel="noreferrer"
+                className="search-result__maps"
                 onClick={(e) => e.stopPropagation()}
-                style={{
-                  background: '#EEEDFE',
-                  color: '#3C3489',
-                  border: '1px solid #AFA9EC',
-                  borderRadius: 6,
-                  padding: '3px 10px',
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0,
-                }}
               >
                 📍 Maps
               </a>
@@ -228,15 +148,7 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
           );
         })}
       </div>
-      <div
-        style={{
-          padding: '8px 16px',
-          fontSize: '0.72rem',
-          color: '#aaa',
-          borderTop: '1px solid #f5f3ee',
-          textAlign: 'center',
-        }}
-      >
+      <div className="search-footer">
         תוצאות מ-OpenStreetMap · לחץ לפתיחה ב-Google Maps
       </div>
     </div>
