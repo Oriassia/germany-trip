@@ -6,3 +6,4 @@ dist-ssr
 .firebaserc
 .DS_Store
 functions/lib
+.env
