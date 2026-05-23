@@ -1,7 +1,7 @@
 import type { Day, Tip, Trip, TripMeta } from '../types/trip';
 
 export const DEFAULT_META: TripMeta = {
-  heroTitle: '🇩🇪 טיול גרמניה – יוני 2026',
+  heroTitle: '✈️ 🇩🇪 טיול גרמניה – יוני 2026',
   heroSubtitle: 'פרנקפורט ← דרך הרומנטית ← רגנסבורג ← מינכן',
   routeEndLabel: 'MUC ✈️',
   tipsSectionTitle: '⚙️ טיפים טכניים לנסיעה',
