@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "firebase:project": "node scripts/firebase-project.mjs",
     "firebase:deploy:rules": "node scripts/firebase-deploy.mjs firestore:rules,firestore:indexes",
-    "firebase:deploy:hosting": "npm run build && node scripts/firebase-deploy.mjs hosting"
+    "firebase:deploy:hosting": "npm run build && node scripts/firebase-deploy.mjs hosting",
+    "firebase:add-auth-domain": "node scripts/firebase-add-auth-domain.mjs"
   },
   "dependencies": {
     "firebase": "^12.13.0",

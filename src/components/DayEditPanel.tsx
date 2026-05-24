@@ -120,7 +120,12 @@ export function DayEditPanel({
         <button type="button" className="btn-cancel" onClick={onCancel}>
           ✕ בטל
         </button>
-        <button type="button" className="btn-danger" onClick={onDelete}>
+        <button
+          type="button"
+          className="btn-danger"
+          onClick={onDelete}
+          aria-label="מחק יום"
+        >
           🗑️ מחק יום
         </button>
       </div>

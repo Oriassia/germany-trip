@@ -72,7 +72,7 @@ export interface TripContextValue {
   addDay: () => string;
   removeDay: (dayId: string) => void;
   saveDay: (dayId: string, updates: Partial<Day>) => void;
-  addActivity: (dayId: string) => string;
+  addActivity: (dayId: string, insertAt?: number) => string;
   saveActivity: (dayId: string, actId: string, updates: Partial<Activity>) => void;
   deleteActivity: (dayId: string, actId: string) => void;
   reorderActivities: (
@@ -425,29 +425,31 @@ export function TripProvider({
   );
 
   const addActivity = useCallback(
-    (dayId: string) => {
+    (dayId: string, insertAt?: number) => {
       if (!canEdit || !trip) return '';
       const actId = 'a' + Date.now();
+      const newActivity = {
+        id: actId,
+        icon: '📌',
+        time: '',
+        title: 'פעילות חדשה',
+        desc: '',
+        mapUrl: '',
+      };
       const next: Trip = {
         ...trip,
-        days: trip.days.map((d) =>
-          d.id === dayId
-            ? {
-                ...d,
-                activities: [
-                  ...d.activities,
-                  {
-                    id: actId,
-                    icon: '📌',
-                    time: '',
-                    title: 'פעילות חדשה',
-                    desc: '',
-                    mapUrl: '',
-                  },
-                ],
-              }
-            : d,
-        ),
+        days: trip.days.map((d) => {
+          if (d.id !== dayId) return d;
+          const at = insertAt ?? d.activities.length;
+          return {
+            ...d,
+            activities: [
+              ...d.activities.slice(0, at),
+              newActivity,
+              ...d.activities.slice(at),
+            ],
+          };
+        }),
       };
       commit(next);
       setEditActKey(`${dayId}:${actId}`);

@@ -80,7 +80,12 @@ export function ActivityEditPanel({
         <button type="button" className="btn-cancel" onClick={onCancel}>
           ✕ בטל
         </button>
-        <button type="button" className="btn-danger" onClick={onDelete}>
+        <button
+          type="button"
+          className="btn-danger"
+          onClick={onDelete}
+          aria-label="מחק פעילות"
+        >
           🗑️
         </button>
       </div>

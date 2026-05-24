@@ -2,6 +2,7 @@ import { useState, type MouseEvent } from 'react';
 import { useTripContext } from '../context/TripContext';
 import type { Day } from '../types/trip';
 import { ActivityItem } from './ActivityItem';
+import { ActivityTimelineAdd } from './ActivityTimelineAdd';
 import { DayEditPanel } from './DayEditPanel';
 
 interface DayCardProps {
@@ -81,11 +82,18 @@ export function DayCard({ day, dayNum }: DayCardProps) {
       />
 
       <div className="day-body" id={`db-${day.id}`}>
-        {day.activities.map((act) => (
+        {day.activities.length === 0 && canEdit && (
+          <ActivityTimelineAdd
+            insertAt={0}
+            onInsert={(at) => addActivity(day.id, at)}
+          />
+        )}
+        {day.activities.map((act, index) => (
           <ActivityItem
             key={`${day.id}-${act.id}`}
             dayId={day.id}
             activity={act}
+            index={index}
           />
         ))}
         {day.navUrl && (
@@ -97,15 +105,6 @@ export function DayCard({ day, dayNum }: DayCardProps) {
           >
             🗺️ נווט יום זה
           </a>
-        )}
-        {canEdit && (
-          <button
-            type="button"
-            className="add-act-btn"
-            onClick={() => addActivity(day.id)}
-          >
-            + הוסף פעילות
-          </button>
         )}
       </div>
     </div>

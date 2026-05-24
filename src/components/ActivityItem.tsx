@@ -5,15 +5,17 @@ import { ActivityEditPanel } from './ActivityEditPanel';
 interface ActivityItemProps {
   dayId: string;
   activity: Activity;
+  index: number;
 }
 
-export function ActivityItem({ dayId, activity }: ActivityItemProps) {
+export function ActivityItem({ dayId, activity, index }: ActivityItemProps) {
   const {
     canEdit,
     editActKey,
     setEditActKey,
     saveActivity,
     deleteActivity,
+    addActivity,
   } = useTripContext();
   const actKey = `${dayId}:${activity.id}`;
   const open = editActKey === actKey;
@@ -33,7 +35,22 @@ export function ActivityItem({ dayId, activity }: ActivityItemProps) {
         )}
         <div className="tl-left">
           <div className="tl-icon">{activity.icon}</div>
-          <div className="tl-line" />
+          {canEdit ? (
+            <div className="tl-connector">
+              <div className="tl-line" />
+              <button
+                type="button"
+                className="add-act-icon-btn"
+                onClick={() => addActivity(dayId, index + 1)}
+                aria-label="הוסף פעילות"
+                title="הוסף פעילות"
+              >
+                +
+              </button>
+            </div>
+          ) : (
+            <div className="tl-line" />
+          )}
         </div>
         <div className="tl-content">
           <div className="tl-time">{activity.time}</div>
@@ -55,6 +72,7 @@ export function ActivityItem({ dayId, activity }: ActivityItemProps) {
             type="button"
             className={`act-edit-btn${open ? ' open' : ''}`}
             onClick={() => setEditActKey(open ? null : actKey)}
+            aria-label="ערוך פעילות"
           >
             ✏️
           </button>

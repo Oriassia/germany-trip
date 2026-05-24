@@ -3,8 +3,15 @@ import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
 admin.initializeApp();
 
-/** v2 callable requires explicit CORS for browser clients (e.g. Vite dev server). */
-const callableOpts = { cors: true, region: 'us-central1' as const };
+/** v2 callable requires explicit CORS origins for browser clients. */
+const callableOpts = {
+  cors: [
+    'http://localhost:5173',
+    'http://localhost:4173',
+    'https://germany-trip-p4k7rbmtd-ori-assias-projects.vercel.app',
+  ],
+  region: 'us-central1' as const,
+};
 
 const db = admin.firestore();
 const auth = admin.auth();
