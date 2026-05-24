@@ -143,26 +143,35 @@ export async function inviteToTrip(
   };
 }
 
-export async function acceptPendingInvites(user: User): Promise<{ accepted: number }> {
-  const email = user.email;
+async function inviteeEmailFromUser(user: User): Promise<string> {
+  await user.getIdToken();
+  const tokenEmail = (await user.getIdTokenResult()).claims.email;
+  const email = typeof tokenEmail === 'string' ? tokenEmail : user.email;
   if (!email) {
     throw new Error('אין אימייל בחשבון');
   }
+  return normalizeEmail(email);
+}
 
-  const normalized = normalizeEmail(email);
+export async function acceptPendingInvites(user: User): Promise<{ accepted: number }> {
+  const normalized = await inviteeEmailFromUser(user);
   fsLog('acceptPendingInvites', {
     uid: user.uid,
     email: normalized,
-    tokenEmail: email,
+    tokenEmail: normalized,
   });
 
   const pending = await fsStep(
     'accept.queryUserInvites',
-    { path: `userInvites/${normalized}/trips`, filter: { status: 'pending' } },
+    {
+      path: `userInvites/${normalized}/trips`,
+      filter: { email: normalized, status: 'pending' },
+    },
     () =>
       getDocs(
         query(
           collection(db, 'userInvites', normalized, 'trips'),
+          where('email', '==', normalized),
           where('status', '==', 'pending'),
         ),
       ),

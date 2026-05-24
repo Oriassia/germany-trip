@@ -49,12 +49,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(next);
       setLoading(false);
       if (next) {
-        void upsertUserProfile(next).catch(() => {
-          /* profile write may fail before rules deploy */
-        });
-        void acceptPendingInvites(next).catch(() => {
-          /* pending invites */
-        });
+        void (async () => {
+          try {
+            await upsertUserProfile(next);
+          } catch {
+            /* profile write may fail before rules deploy */
+          }
+          try {
+            await acceptPendingInvites(next);
+          } catch (err) {
+            console.warn('[auth] acceptPendingInvites failed', err);
+          }
+        })();
       }
     });
     return unsub;

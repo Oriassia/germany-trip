@@ -32,16 +32,18 @@ service cloud.firestore {
       return isOwner(tripId) || isTripCreator(tripId);
     }
 
-    // Inbox for pending invites (path uses lower-case email as doc id)
-    match /userInvites/{email} {
-      allow read: if request.auth != null
+    function isInviteeEmail() {
+      return request.auth != null
         && request.auth.token.email != null
-        && email == request.auth.token.email;
+        && resource.data.email == request.auth.token.email;
+    }
+
+    // Inbox for pending invites (doc id + path use lower-case email)
+    match /userInvites/{email} {
+      allow read: if false;
 
       match /trips/{tripId} {
-        allow read, update: if request.auth != null
-          && request.auth.token.email != null
-          && email == request.auth.token.email;
+        allow read, update: if isInviteeEmail();
         allow create, delete: if request.auth != null && canManageInvites(tripId);
       }
     }
